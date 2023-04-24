@@ -36,6 +36,8 @@ export class AuthController {
 
       return sendResponse(res, STATUS_CODES.SUCCESSFULLY_CREATED, 'The user signed up successfully', { id: insertUserResult.insertId, username });
     } catch (error) {
+      if (error.code === dbErrorCodes.ER_DUP_ENTRY) delete error.sql;
+
       return sendResponse(
         res,
         error.code === dbErrorCodes.ER_DUP_ENTRY ? STATUS_CODES.BAD_REQUEST : error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
