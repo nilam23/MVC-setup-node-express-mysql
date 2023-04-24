@@ -1,4 +1,9 @@
-import { STATUS_CODES, dbErrorCodes, userAuthRequiredFields } from '../helpers/constants.js';
+import {
+  STATUS_CODES,
+  cookieAttributeForJwtToken,
+  dbErrorCodes,
+  userAuthRequiredFields
+} from '../helpers/constants.js';
 import {
   isAvailable,
   saveCookie,
@@ -60,9 +65,9 @@ export class AuthController {
     try {
       const { user, token: access_token } = await AuthService.logInUser(username, password);
 
-      saveCookie(res, 'jwt_token', access_token);
+      saveCookie(res, cookieAttributeForJwtToken, access_token);
 
-      return sendResponse(res, STATUS_CODES.OK, 'User logged in successfully', { userId: user.id, username: user.username, access_token });
+      return sendResponse(res, STATUS_CODES.OK, 'User logged in successfully', { userId: user.id, username: user.username });
     } catch (error) {
       return sendResponse(
         res,
@@ -75,5 +80,20 @@ export class AuthController {
         error.response || error
       );
     }
+  }
+
+  /**
+   * @description
+   * the controller method to log out a user
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static logOutUser(req, res) {
+    if (req.cookies[`${cookieAttributeForJwtToken}`]) {
+      res.clearCookie(cookieAttributeForJwtToken);
+
+      return sendResponse(res, STATUS_CODES.OK, 'User logged out successfully');
+    }
+    return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'You need to log in first');
   }
 }

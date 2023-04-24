@@ -9,4 +9,8 @@ export const authRoutes = (app) => {
   app
     .route('/login')
     .post(AuthController.logInUser);
+
+  app
+    .route('/logout')
+    .post(AuthController.logOutUser);
 };

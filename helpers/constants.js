@@ -22,3 +22,6 @@ export const dbErrorCodes = {
 
 // jwt expiry
 export const jwtExpiry = 1 * 60 * 60;
+
+// attribute for the cookie to be created to save the jwt token
+export const cookieAttributeForJwtToken = 'jwt_token';
