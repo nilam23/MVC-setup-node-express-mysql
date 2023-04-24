@@ -8,3 +8,14 @@ export const STATUS_CODES = {
   REDIRECT: 302,
   TOO_MANY_REQUESTS: 429,
 };
+
+// the mandatory fields during user auth
+export const userAuthRequiredFields = {
+  USERNAME: 'username',
+  PASSWORD: 'password'
+};
+
+// db error codes for error handling
+export const dbErrorCodes = {
+  ER_DUP_ENTRY: 'ER_DUP_ENTRY'
+};
