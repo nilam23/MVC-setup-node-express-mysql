@@ -45,4 +45,26 @@ export class UserModel {
 
     return result;
   }
+
+  /**
+   * @description
+   * the following method updates the blog corresponding to a particular id
+   * @param {object} targetObj the fields and their corresponding values of the blog to be updated
+   * @param {number} blogId the id of the blog
+   * @returns the blog updation result
+   */
+  static async updateBlog(targetObj, blogId) {
+    let query = 'UPDATE blogs SET ';
+
+    Object.entries(targetObj).forEach(([key, value], index) => {
+      if (index === Object.keys(targetObj).length - 1) query += `${key} = '${value}' WHERE id = ?`;
+      else query += `${key} = '${value}', `;
+    });
+
+    const params = [blogId];
+
+    const result = await Database.executeQuery(query, params);
+
+    return result;
+  }
 }

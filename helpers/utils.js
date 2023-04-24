@@ -46,12 +46,15 @@ export const validate = {
  * with the corresponding array of required fields
  * @param {object} targetObject object of which keys are to be checked
  * @param {array} requiredFieldsArray array of fields to be checked in the targetObject
+ * @param {boolean} checkForAll the boolean to indicate whether all fields from requiredFieldsArr should be present in targetObj
  * @returns a boolean confirming the match
  */
-export const isAvailable = (targetObj, requiredFieldsArr) => {
+export const isAvailable = (targetObj, requiredFieldsArr, checkForAll = true) => {
   const targetKeysArr = Object.keys(targetObj);
 
-  const match = requiredFieldsArr.every((field) => targetKeysArr.includes(field));
+  let match;
+  if (checkForAll) match = requiredFieldsArr.every((field) => targetKeysArr.includes(field));
+  else match = requiredFieldsArr.some((field) => targetKeysArr.includes(field));
 
   return match;
 };

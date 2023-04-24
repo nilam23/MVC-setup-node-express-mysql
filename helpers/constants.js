@@ -22,6 +22,12 @@ export const blogCreationRequiredFields = {
   DESCRIPTION: 'description'
 };
 
+// the possible fields to update a blog
+export const possibleBlogUpdateFields = {
+  TITLE: 'title',
+  DESCRIPTION: 'description'
+};
+
 // db error codes for error handling
 export const dbErrorCodes = {
   ER_DUP_ENTRY: 'ER_DUP_ENTRY'

@@ -1,4 +1,4 @@
-import { STATUS_CODES, blogCreationRequiredFields } from '../helpers/constants.js';
+import { STATUS_CODES, blogCreationRequiredFields, possibleBlogUpdateFields } from '../helpers/constants.js';
 import { isAvailable, sendResponse } from '../helpers/utils.js';
 import { UserModel } from '../models/user.model.js';
 
@@ -75,9 +75,46 @@ export class UserController {
     try {
       const blog = await UserModel.getBlogById(blogId);
 
-      if (!blog) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`, {});
+      if (!blog) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
 
       return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} fetched successfully`, blog);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to update some attributes of a blog corresponding to an id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static async updateBlog(req, res) {
+    const { body: requestBody } = req;
+
+    const fieldsToBeUpdatedExist = isAvailable(requestBody, Object.values(possibleBlogUpdateFields), false);
+
+    if (!fieldsToBeUpdatedExist) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Fields to be updated does not exist');
+
+    const blogId = req.params.id;
+
+    try {
+      const blogToBeUpdated = await UserModel.getBlogById(blogId);
+
+      if (!blogToBeUpdated) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
+
+      if (blogToBeUpdated.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+
+      const updateBlogResult = await UserModel.updateBlog(requestBody, blogId);
+
+      if (updateBlogResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} updated successfully`);
+      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `Blog with id ${blogId} could not be updated`);
     } catch (error) {
       return sendResponse(
         res,
