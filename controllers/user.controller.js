@@ -1,6 +1,6 @@
-import { STATUS_CODES } from '../helpers/constants.js';
-import { sendResponse } from '../helpers/utils.js';
-import { UserModelClass } from '../models/user.model.js';
+import { STATUS_CODES, blogCreationRequiredFields } from '../helpers/constants.js';
+import { isAvailable, sendResponse } from '../helpers/utils.js';
+import { UserModel } from '../models/user.model.js';
 
 export class UserController {
   /**
@@ -10,12 +10,47 @@ export class UserController {
    * @param {object} res the response object
    * @returns the array of blogs for the user
    */
-  static async getUserBlogs(req, res) {
+  static async getAllBlogs(req, res) {
     try {
-      const userId = 1;
-      const blogs = await UserModelClass.getUserBlogs(userId);
+      const blogs = await UserModel.getAllBlogs();
 
-      return sendResponse(res, STATUS_CODES.OK, 'User blogs fetched successfully', blogs);
+      return sendResponse(res, STATUS_CODES.OK, 'All blogs fetched successfully', blogs);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to create a blog for a particular user
+   * @param {object} req the request object
+   * @param {object} res the response object
+   * @returns the created blog for the user
+   */
+  static async createBlog(req, res) {
+    const { body: requestBody } = req;
+    requestBody.userId = res.locals.user.id;
+
+    const allFieldsArePresent = isAvailable(requestBody, Object.values(blogCreationRequiredFields));
+
+    if (!allFieldsArePresent) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Some fields are missing');
+
+    const { title, description, userId } = requestBody;
+    try {
+      const blogCreateResult = await UserModel.createBlog(title, description, userId);
+
+      return sendResponse(res, STATUS_CODES.SUCCESSFULLY_CREATED, 'Blog created successfully', {
+        id: blogCreateResult.insertId,
+        title,
+        description,
+        userId
+      });
     } catch (error) {
       return sendResponse(
         res,
