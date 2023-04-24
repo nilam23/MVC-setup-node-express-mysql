@@ -8,3 +8,20 @@ export const STATUS_CODES = {
   REDIRECT: 302,
   TOO_MANY_REQUESTS: 429,
 };
+
+// the mandatory fields during user auth
+export const userAuthRequiredFields = {
+  USERNAME: 'username',
+  PASSWORD: 'password'
+};
+
+// db error codes for error handling
+export const dbErrorCodes = {
+  ER_DUP_ENTRY: 'ER_DUP_ENTRY'
+};
+
+// jwt expiry
+export const jwtExpiry = 1 * 60 * 60;
+
+// attribute for the cookie to be created to save the jwt token
+export const cookieAttributeForJwtToken = 'jwt_token';
