@@ -7,4 +7,8 @@ export const userRoutes = (app) => {
     .route('/blogs')
     .get(UserController.getAllBlogs)
     .post(AuthMiddlewares.checkAuth, UserController.createBlog);
+
+  app
+    .route('/blogs/:id')
+    .get(UserController.getBlogById);
 };

@@ -61,4 +61,31 @@ export class UserController {
       );
     }
   }
+
+  /**
+   * @description
+   * the controller method to fetch the blog corresponding to a blog id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   * @returns the blog fetched from the database
+   */
+  static async getBlogById(req, res) {
+    const blogId = req.params.id;
+
+    try {
+      const blog = await UserModel.getBlogById(blogId);
+
+      if (!blog) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`, {});
+
+      return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} fetched successfully`, blog);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
 }
