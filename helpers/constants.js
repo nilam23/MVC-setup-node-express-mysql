@@ -19,3 +19,6 @@ export const userAuthRequiredFields = {
 export const dbErrorCodes = {
   ER_DUP_ENTRY: 'ER_DUP_ENTRY'
 };
+
+// jwt expiry
+export const jwtExpiry = 1 * 60 * 60;

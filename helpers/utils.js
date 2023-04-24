@@ -1,5 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { jwtExpiry } from './constants.js';
 
 /**
  * @description
@@ -67,3 +69,41 @@ export const getHashPassword = async (password) => {
 
   return hashPassword;
 };
+
+/**
+ * @description
+ * the following method receive's user's password from log in request and the password saved in the database
+ * and then verifies both of them
+ * @param {string} plainTextPassword the password entered by the user during log in
+ * @param {string} hashPassword the password extracted from the database
+ * @returns a boolean confirming the password verification
+ */
+export const verifyUserPassword = async (plainTextPassword, hashPassword) => {
+  const validation = await bcrypt.compare(plainTextPassword, hashPassword);
+
+  return validation;
+};
+
+/**
+ * @description
+ * the following method creates a jwt token using a payload of user id and username
+ * @param {object} jwtPayload the jwt payload consisting of user id and username
+ * @returns the jwt token
+ */
+export const getJwtToken = (jwtPayload) => jwt.sign(
+  {
+    userId: jwtPayload.userId,
+    username: jwtPayload.username
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: jwtExpiry }
+);
+
+/**
+ * @description
+ * the following method creates a cookie and attaches it to the response object
+ * @param {object} res the response to be sent back to the client
+ * @param {*} key the key of the cookie to be created
+ * @param {*} value the value of the cookie to be created
+ */
+export const saveCookie = (res, key, value) => res.cookie(key, value, { httpOnly: true, maxAge: jwtExpiry * 1000 });

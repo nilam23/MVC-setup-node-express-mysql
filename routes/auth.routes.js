@@ -5,4 +5,8 @@ export const authRoutes = (app) => {
   app
     .route('/signup')
     .post(AuthController.signUpUser);
+
+  app
+    .route('/login')
+    .post(AuthController.logInUser);
 };

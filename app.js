@@ -1,4 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import {} from 'dotenv/config.js';
 import { userRoutes } from './routes/user.routes.js';
 import { STATUS_CODES } from './helpers/constants.js';
@@ -9,6 +11,7 @@ const app = express();
 
 // middlewares
 app.use(express.json());
+app.use(cookieParser());
 
 // routes
 authRoutes(app);
