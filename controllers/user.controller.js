@@ -125,4 +125,35 @@ export class UserController {
       );
     }
   }
+
+  /**
+   * @description
+   * the controller method to delete a blog corresponding to an id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static async deleteBlog(req, res) {
+    const blogId = req.params.id;
+
+    try {
+      const blogToBeDeleted = await UserModel.getBlogById(blogId);
+
+      if (!blogToBeDeleted) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
+
+      if (blogToBeDeleted.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+
+      const deleteBlogResult = await UserModel.deleteBlog(blogId);
+
+      if (deleteBlogResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} deleted successfully`);
+      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `Blog with id ${blogId} could not be deleted`);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
 }

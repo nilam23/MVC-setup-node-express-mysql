@@ -67,4 +67,19 @@ export class UserModel {
 
     return result;
   }
+
+  /**
+   * @description
+   * the following method deletes a blog corresponding to a particular id
+   * @param {number} blogId the id of the blog
+   * @returns the blog deletion result
+   */
+  static async deleteBlog(blogId) {
+    const query = 'DELETE FROM blogs WHERE id = ?';
+    const params = [blogId];
+
+    const result = await Database.executeQuery(query, params);
+
+    return result;
+  }
 }

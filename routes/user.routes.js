@@ -11,5 +11,6 @@ export const userRoutes = (app) => {
   app
     .route('/blogs/:id')
     .get(UserController.getBlogById)
-    .patch(AuthMiddlewares.checkAuth, UserController.updateBlog);
+    .patch(AuthMiddlewares.checkAuth, UserController.updateBlog)
+    .delete(AuthMiddlewares.checkAuth, UserController.deleteBlog);
 };
