@@ -1,5 +1,6 @@
 import { STATUS_CODES, blogCreationRequiredFields, possibleBlogUpdateFields } from '../helpers/constants.js';
 import { isAvailable, sendResponse } from '../helpers/utils.js';
+import { AuthModel } from '../models/auth.model.js';
 import { UserModel } from '../models/user.model.js';
 
 export class UserController {
@@ -146,6 +147,37 @@ export class UserController {
 
       if (deleteBlogResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} deleted successfully`);
       return sendResponse(res, STATUS_CODES.BAD_REQUEST, `Blog with id ${blogId} could not be deleted`);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to fetch a user corresponding to an id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static async getUserById(req, res) {
+    const userId = req.params.id;
+
+    try {
+      const user = await AuthModel.findUserByAttribute('id', userId);
+
+      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+
+      return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} fetched successfully`, {
+        id: user.id,
+        username: user.username
+      });
     } catch (error) {
       return sendResponse(
         res,

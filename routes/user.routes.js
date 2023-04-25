@@ -13,4 +13,8 @@ export const userRoutes = (app) => {
     .get(UserController.getBlogById)
     .patch(AuthMiddlewares.checkAuth, UserController.updateBlog)
     .delete(AuthMiddlewares.checkAuth, UserController.deleteBlog);
+
+  app
+    .route('/users/:id')
+    .get(AuthMiddlewares.checkAuth, UserController.getUserById);
 };
