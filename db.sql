@@ -1,0 +1,22 @@
+CREATE DATABASE blog_application;
+
+USE blog_application;
+
+CREATE TABLE users(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(20) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  UNIQUE (username)
+);
+
+CREATE TABLE blogs(
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  userId INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
