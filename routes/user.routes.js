@@ -16,5 +16,6 @@ export const userRoutes = (app) => {
 
   app
     .route('/users/:id')
-    .get(AuthMiddlewares.checkAuth, UserController.getUserById);
+    .get(AuthMiddlewares.checkAuth, UserController.getUserById)
+    .patch(AuthMiddlewares.checkAuth, UserController.updateUser);
 };

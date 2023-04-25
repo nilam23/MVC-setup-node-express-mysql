@@ -28,6 +28,11 @@ export const possibleBlogUpdateFields = {
   DESCRIPTION: 'description'
 };
 
+// user fields that can be updated
+export const userUpdateFields = {
+  USERNAME: 'username'
+};
+
 // db error codes for error handling
 export const dbErrorCodes = {
   ER_DUP_ENTRY: 'ER_DUP_ENTRY'

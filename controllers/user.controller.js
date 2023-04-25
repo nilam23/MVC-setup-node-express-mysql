@@ -1,4 +1,9 @@
-import { STATUS_CODES, blogCreationRequiredFields, possibleBlogUpdateFields } from '../helpers/constants.js';
+import {
+  STATUS_CODES,
+  blogCreationRequiredFields,
+  possibleBlogUpdateFields,
+  userUpdateFields
+} from '../helpers/constants.js';
 import { isAvailable, sendResponse } from '../helpers/utils.js';
 import { AuthModel } from '../models/auth.model.js';
 import { UserModel } from '../models/user.model.js';
@@ -163,6 +168,7 @@ export class UserController {
    * the controller method to fetch a user corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @returns the user fetched from the database
    */
   static async getUserById(req, res) {
     const userId = req.params.id;
@@ -178,6 +184,43 @@ export class UserController {
         id: user.id,
         username: user.username
       });
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to update some attributes of a user corresponding to an id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static async updateUser(req, res) {
+    const { body: requestBody } = req;
+
+    const fieldsToBeUpdatedExist = isAvailable(requestBody, Object.values(userUpdateFields), false);
+
+    if (!fieldsToBeUpdatedExist) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Fields to be updated does not exist');
+
+    const userId = req.params.id;
+
+    try {
+      const user = await AuthModel.findUserByAttribute('id', userId);
+
+      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+
+      const updateUserResult = await UserModel.updateUser(requestBody, userId);
+
+      if (updateUserResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} updated successfully`);
+      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `User with id ${userId} could not be updated`);
     } catch (error) {
       return sendResponse(
         res,
