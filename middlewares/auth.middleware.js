@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import jwt from 'jsonwebtoken';
 import { STATUS_CODES, cookieAttributeForJwtToken } from '../helpers/constants.js';
-import { sendResponse } from '../helpers/utils.js';
+import { sendResponse, verifyJwtToken } from '../helpers/utils.js';
 
 export const AuthMiddlewares = {};
 
@@ -17,14 +16,16 @@ AuthMiddlewares.checkAuth = async (req, res, next) => {
   const token = req.cookies[`${cookieAttributeForJwtToken}`];
 
   if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-      if (err) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+    try {
+      const decodedToken = verifyJwtToken(token);
 
       res.locals.user = {
         id: decodedToken.userId,
-        username: decodedToken.username
+        username: decodedToken.username,
       };
       next();
-    });
+    } catch (error) {
+      return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized', [], error);
+    }
   } else return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
 };

@@ -110,3 +110,15 @@ export const getJwtToken = (jwtPayload) => jwt.sign(
  * @param {*} value the value of the cookie to be created
  */
 export const saveCookie = (res, key, value) => res.cookie(key, value, { httpOnly: true, maxAge: jwtExpiry * 1000 });
+
+/**
+ * @description
+ * the following method receives a jwt token and then verifies the same
+ * @param {string} token the jwt token to be verified
+ * @returns the decoded token, if verification is successful
+ */
+export const verifyJwtToken = (token) => {
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+  return decodedToken;
+};
