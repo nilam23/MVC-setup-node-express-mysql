@@ -15,6 +15,24 @@ export const userAuthRequiredFields = {
   PASSWORD: 'password'
 };
 
+// the mandatory fields to create a blog for a user
+export const blogCreationRequiredFields = {
+  USER_ID: 'userId',
+  TITLE: 'title',
+  DESCRIPTION: 'description'
+};
+
+// the possible fields to update a blog
+export const possibleBlogUpdateFields = {
+  TITLE: 'title',
+  DESCRIPTION: 'description'
+};
+
+// user fields that can be updated
+export const userUpdateFields = {
+  USERNAME: 'username'
+};
+
 // db error codes for error handling
 export const dbErrorCodes = {
   ER_DUP_ENTRY: 'ER_DUP_ENTRY'
