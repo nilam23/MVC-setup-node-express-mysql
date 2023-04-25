@@ -1,6 +1,7 @@
 import {
   STATUS_CODES,
   blogCreationRequiredFields,
+  cookieAttributeForJwtToken,
   possibleBlogUpdateFields,
   userUpdateFields
 } from '../helpers/constants.js';
@@ -221,6 +222,40 @@ export class UserController {
 
       if (updateUserResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} updated successfully`);
       return sendResponse(res, STATUS_CODES.BAD_REQUEST, `User with id ${userId} could not be updated`);
+    } catch (error) {
+      return sendResponse(
+        res,
+        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+        error.message || 'Internal Server Error',
+        [],
+        error.response || error
+      );
+    }
+  }
+
+  /**
+   * @description
+   * the controller method to delete a user corresponding to an id
+   * @param {object} req the request object
+   * @param {object} res the response object
+   */
+  static async deleteUser(req, res) {
+    const userId = req.params.id;
+
+    try {
+      const user = await AuthModel.findUserByAttribute('id', userId);
+
+      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+
+      const deleteUserResult = await UserModel.deleteUser(userId);
+
+      if (deleteUserResult.affectedRows) {
+        res.clearCookie(cookieAttributeForJwtToken); // on deleting the user, the auth token must be deleted from cookie as well
+        return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} deleted successfully`);
+      }
+      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `User with id ${userId} could not be deleted`);
     } catch (error) {
       return sendResponse(
         res,

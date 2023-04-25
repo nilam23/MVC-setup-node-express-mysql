@@ -104,4 +104,19 @@ export class UserModel {
 
     return result;
   }
+
+  /**
+   * @description
+   * the following method deletes a user corresponding to a particular id
+   * @param {number} userId the id of the user
+   * @returns the user deletion result
+   */
+  static async deleteUser(userId) {
+    const query = 'DELETE FROM users WHERE id = ?';
+    const params = [userId];
+
+    const result = await Database.executeQuery(query, params);
+
+    return result;
+  }
 }
