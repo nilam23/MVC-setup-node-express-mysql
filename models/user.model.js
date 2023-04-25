@@ -54,14 +54,16 @@ export class UserModel {
    * @returns the blog updation result
    */
   static async updateBlog(targetObj, blogId) {
-    let query = 'UPDATE blogs SET ';
+    let query = 'UPDATE blogs SET updated_at = ?, ';
+    const currentTime = new Date();
+    const params = [currentTime];
 
     Object.entries(targetObj).forEach(([key, value], index) => {
       if (index === Object.keys(targetObj).length - 1) query += `${key} = '${value}' WHERE id = ?`;
       else query += `${key} = '${value}', `;
     });
 
-    const params = [blogId];
+    params.push(blogId);
 
     const result = await Database.executeQuery(query, params);
 

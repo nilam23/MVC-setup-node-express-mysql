@@ -6,8 +6,6 @@ CREATE TABLE users(
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(20) NOT NULL,
   password VARCHAR(255) NOT NULL,
-  password_attempts INT DEFAULT 5,
-  next_attempt TIMESTAMP DEFAULT NULL,
   UNIQUE (username)
 );
 
