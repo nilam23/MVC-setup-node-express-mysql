@@ -16,7 +16,7 @@ app.use(cookieParser());
 // routes
 authRoutes(app);
 userRoutes(app);
-app.all('*', (req, res) => sendResponse(res, STATUS_CODES.BAD_REQUEST, `Can't find ${req.method} ${req.originalUrl} on this server!`));
+app.all('*', (req, res) => sendResponse(res, STATUS_CODES.NOT_FOUND, `Can't find ${req.method} ${req.originalUrl} on this server!`));
 
 // running the server
 const PORT = process.env.PORT || 3000;
