@@ -21,6 +21,8 @@ export class UserController {
     try {
       const blogs = await UserModel.getAllBlogs();
 
+      if (!blogs.length) return sendResponse(res, STATUS_CODES.NOT_FOUND, 'No blog found');
+
       return sendResponse(res, STATUS_CODES.OK, 'All blogs fetched successfully', blogs);
     } catch (error) {
       return sendResponse(
@@ -82,7 +84,7 @@ export class UserController {
     try {
       const blog = await UserModel.getBlogById(blogId);
 
-      if (!blog) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
+      if (!blog) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
 
       return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} fetched successfully`, blog);
     } catch (error) {
@@ -114,9 +116,9 @@ export class UserController {
     try {
       const blogToBeUpdated = await UserModel.getBlogById(blogId);
 
-      if (!blogToBeUpdated) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
+      if (!blogToBeUpdated) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
 
-      if (blogToBeUpdated.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+      if (blogToBeUpdated.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
 
       const updateBlogResult = await UserModel.updateBlog(requestBody, blogId);
 
@@ -145,9 +147,9 @@ export class UserController {
     try {
       const blogToBeDeleted = await UserModel.getBlogById(blogId);
 
-      if (!blogToBeDeleted) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} not found`);
+      if (!blogToBeDeleted) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
 
-      if (blogToBeDeleted.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+      if (blogToBeDeleted.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
 
       const deleteBlogResult = await UserModel.deleteBlog(blogId);
 
@@ -177,9 +179,9 @@ export class UserController {
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
 
       return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} fetched successfully`, {
         id: user.id,
@@ -214,9 +216,9 @@ export class UserController {
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
 
       const updateUserResult = await UserModel.updateUser(requestBody, userId);
 
@@ -245,9 +247,9 @@ export class UserController {
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} does not exist`);
+      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
 
       const deleteUserResult = await UserModel.deleteUser(userId);
 
