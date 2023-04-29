@@ -4,6 +4,7 @@ import {
   dbErrorCodes,
   userAuthRequiredFields
 } from '../helpers/constants.js';
+import { AppError } from '../helpers/error.js';
 import {
   isAvailable,
   saveCookie,
@@ -20,30 +21,30 @@ export class AuthController {
    * @param {object} res the response object
    * @returns the newly created user
    */
-  static async signUpUser(req, res) {
+  static async signUpUser(req, res, next) {
     const { body: requestBody } = req;
 
     const allFieldsArePresent = isAvailable(requestBody, Object.values(userAuthRequiredFields));
 
-    if (!allFieldsArePresent) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Some fields are missing');
+    if (!allFieldsArePresent) return next(new AppError('Some fields are missing', STATUS_CODES.BAD_REQUEST));
 
     const { username, password } = requestBody;
 
-    if (!validate.password(password)) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Please use a different password');
+    if (!validate.password(password)) return next(new AppError('Please use a different password', STATUS_CODES.BAD_REQUEST));
 
     try {
       const insertUserResult = await AuthService.signUpUser(username, password);
 
       return sendResponse(res, STATUS_CODES.SUCCESSFULLY_CREATED, 'The user signed up successfully', { id: insertUserResult.insertId, username });
     } catch (error) {
-      if (error.code === dbErrorCodes.ER_DUP_ENTRY) delete error.sql;
+      if (error.code === dbErrorCodes.ER_DUP_ENTRY) delete error.sql; // avoiding the sql query to prevent showcasing sensitive information in the response
 
-      return sendResponse(
-        res,
-        error.code === dbErrorCodes.ER_DUP_ENTRY ? STATUS_CODES.BAD_REQUEST : error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.code === dbErrorCodes.ER_DUP_ENTRY ? 'Username already exists' : error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.code === dbErrorCodes.ER_DUP_ENTRY ? 'Username already exists' : error.message || 'Internal Server Error',
+          error.code === dbErrorCodes.ER_DUP_ENTRY ? STATUS_CODES.BAD_REQUEST : error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -55,12 +56,12 @@ export class AuthController {
    * @param {object} res the response object
    * @returns the information of the logged in user and the access token
    */
-  static async logInUser(req, res) {
+  static async logInUser(req, res, next) {
     const { body: requestBody } = req;
 
     const allFieldsArePresent = isAvailable(requestBody, Object.values(userAuthRequiredFields));
 
-    if (!allFieldsArePresent) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Some fields are missing');
+    if (!allFieldsArePresent) return next(new AppError('Some fields are missing', STATUS_CODES.BAD_REQUEST));
 
     const { username, password } = requestBody;
 
@@ -71,15 +72,15 @@ export class AuthController {
 
       return sendResponse(res, STATUS_CODES.OK, 'User logged in successfully', { userId: user.id, username: user.username });
     } catch (error) {
-      return sendResponse(
-        res,
-        error.message === 'Incorrect username'
-        || error.message === 'Incorrect password'
-          ? STATUS_CODES.BAD_REQUEST
-          : error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.message === 'Incorrect username'
+          || error.message === 'Incorrect password'
+            ? STATUS_CODES.BAD_REQUEST
+            : error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -90,12 +91,13 @@ export class AuthController {
    * @param {object} req the request object
    * @param {object} res the response object
    */
-  static logOutUser(req, res) {
+  static logOutUser(req, res, next) {
     if (req.cookies[`${cookieAttributeForJwtToken}`]) {
       res.clearCookie(cookieAttributeForJwtToken);
 
       return sendResponse(res, STATUS_CODES.OK, 'User logged out successfully');
     }
-    return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'You need to log in first');
+
+    return next(new AppError('You need to log in first', STATUS_CODES.BAD_REQUEST));
   }
 }

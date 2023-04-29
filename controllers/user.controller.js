@@ -5,6 +5,7 @@ import {
   possibleBlogUpdateFields,
   userUpdateFields
 } from '../helpers/constants.js';
+import { AppError } from '../helpers/error.js';
 import { isAvailable, sendResponse } from '../helpers/utils.js';
 import { AuthModel } from '../models/auth.model.js';
 import { UserModel } from '../models/user.model.js';
@@ -17,20 +18,20 @@ export class UserController {
    * @param {object} res the response object
    * @returns the array of blogs for the user
    */
-  static async getAllBlogs(req, res) {
+  static async getAllBlogs(req, res, next) {
     try {
       const blogs = await UserModel.getAllBlogs();
 
-      if (!blogs.length) return sendResponse(res, STATUS_CODES.NOT_FOUND, 'No blog found');
+      if (!blogs.length) return next(new AppError('No blog found', STATUS_CODES.NOT_FOUND));
 
       return sendResponse(res, STATUS_CODES.OK, 'All blogs fetched successfully', blogs);
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -42,13 +43,13 @@ export class UserController {
    * @param {object} res the response object
    * @returns the created blog for the user
    */
-  static async createBlog(req, res) {
+  static async createBlog(req, res, next) {
     const { body: requestBody } = req;
     requestBody.userId = res.locals.user.id;
 
     const allFieldsArePresent = isAvailable(requestBody, Object.values(blogCreationRequiredFields));
 
-    if (!allFieldsArePresent) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Some fields are missing');
+    if (!allFieldsArePresent) return next(new AppError('Some fields are missing', STATUS_CODES.BAD_REQUEST));
 
     const { title, description, userId } = requestBody;
     try {
@@ -61,12 +62,12 @@ export class UserController {
         userId
       });
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -78,22 +79,22 @@ export class UserController {
    * @param {object} res the response object
    * @returns the blog fetched from the database
    */
-  static async getBlogById(req, res) {
+  static async getBlogById(req, res, next) {
     const blogId = req.params.id;
 
     try {
       const blog = await UserModel.getBlogById(blogId);
 
-      if (!blog) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
+      if (!blog) return next(new AppError(`Blog with id ${blogId} not found`, STATUS_CODES.NOT_FOUND));
 
       return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} fetched successfully`, blog);
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -104,33 +105,33 @@ export class UserController {
    * @param {object} req the request object
    * @param {object} res the response object
    */
-  static async updateBlog(req, res) {
+  static async updateBlog(req, res, next) {
     const { body: requestBody } = req;
 
     const fieldsToBeUpdatedExist = isAvailable(requestBody, Object.values(possibleBlogUpdateFields), false);
 
-    if (!fieldsToBeUpdatedExist) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Fields to be updated does not exist');
+    if (!fieldsToBeUpdatedExist) return next(new AppError('Fields to be updated does not exist', STATUS_CODES.BAD_REQUEST));
 
     const blogId = req.params.id;
 
     try {
       const blogToBeUpdated = await UserModel.getBlogById(blogId);
 
-      if (!blogToBeUpdated) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
+      if (!blogToBeUpdated) return next(new AppError(`Blog with id ${blogId} not found`, STATUS_CODES.NOT_FOUND));
 
-      if (blogToBeUpdated.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
+      if (blogToBeUpdated.userId !== res.locals.user.id) return next(new AppError('You are not authorized', STATUS_CODES.FORBIDDEN));
 
       const updateBlogResult = await UserModel.updateBlog(requestBody, blogId);
 
       if (updateBlogResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} updated successfully`);
-      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `Blog with id ${blogId} could not be updated`);
+      return next(new AppError(`Blog with id ${blogId} could not be updated`, STATUS_CODES.BAD_REQUEST));
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -141,27 +142,27 @@ export class UserController {
    * @param {object} req the request object
    * @param {object} res the response object
    */
-  static async deleteBlog(req, res) {
+  static async deleteBlog(req, res, next) {
     const blogId = req.params.id;
 
     try {
       const blogToBeDeleted = await UserModel.getBlogById(blogId);
 
-      if (!blogToBeDeleted) return sendResponse(res, STATUS_CODES.NOT_FOUND, `Blog with id ${blogId} not found`);
+      if (!blogToBeDeleted) return next(new AppError(`Blog with id ${blogId} not found`, STATUS_CODES.NOT_FOUND));
 
-      if (blogToBeDeleted.userId !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
+      if (blogToBeDeleted.userId !== res.locals.user.id) return next(new AppError('You are not authorized', STATUS_CODES.FORBIDDEN));
 
       const deleteBlogResult = await UserModel.deleteBlog(blogId);
 
       if (deleteBlogResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `Blog with id ${blogId} deleted successfully`);
-      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `Blog with id ${blogId} could not be deleted`);
+      return next(new AppError(`Blog with id ${blogId} could not be deleted`, STATUS_CODES.BAD_REQUEST));
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -173,27 +174,27 @@ export class UserController {
    * @param {object} res the response object
    * @returns the user fetched from the database
    */
-  static async getUserById(req, res) {
+  static async getUserById(req, res, next) {
     const userId = req.params.id;
 
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
+      if (!user) return next(new AppError(`User with id ${userId} does not exist`, STATUS_CODES.NOT_FOUND));
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return next(new AppError('You are not authorized', STATUS_CODES.FORBIDDEN));
 
       return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} fetched successfully`, {
         id: user.id,
         username: user.username
       });
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -204,33 +205,33 @@ export class UserController {
    * @param {object} req the request object
    * @param {object} res the response object
    */
-  static async updateUser(req, res) {
+  static async updateUser(req, res, next) {
     const { body: requestBody } = req;
 
     const fieldsToBeUpdatedExist = isAvailable(requestBody, Object.values(userUpdateFields), false);
 
-    if (!fieldsToBeUpdatedExist) return sendResponse(res, STATUS_CODES.BAD_REQUEST, 'Fields to be updated does not exist');
+    if (!fieldsToBeUpdatedExist) return next(new AppError('Fields to be updated does not exist', STATUS_CODES.BAD_REQUEST));
 
     const userId = req.params.id;
 
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
+      if (!user) return next(new AppError(`User with id ${userId} does not exist`, STATUS_CODES.NOT_FOUND));
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return next(new AppError('You are not authorized', STATUS_CODES.FORBIDDEN));
 
       const updateUserResult = await UserModel.updateUser(requestBody, userId);
 
       if (updateUserResult.affectedRows) return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} updated successfully`);
-      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `User with id ${userId} could not be updated`);
+      return next(new AppError(`User with id ${userId} could not be updated`, STATUS_CODES.BAD_REQUEST));
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
@@ -241,15 +242,15 @@ export class UserController {
    * @param {object} req the request object
    * @param {object} res the response object
    */
-  static async deleteUser(req, res) {
+  static async deleteUser(req, res, next) {
     const userId = req.params.id;
 
     try {
       const user = await AuthModel.findUserByAttribute('id', userId);
 
-      if (!user) return sendResponse(res, STATUS_CODES.NOT_FOUND, `User with id ${userId} does not exist`);
+      if (!user) return next(new AppError(`User with id ${userId} does not exist`, STATUS_CODES.NOT_FOUND));
 
-      if (user.id !== res.locals.user.id) return sendResponse(res, STATUS_CODES.FORBIDDEN, 'You are not authorized');
+      if (user.id !== res.locals.user.id) return next(new AppError('You are not authorized', STATUS_CODES.FORBIDDEN));
 
       const deleteUserResult = await UserModel.deleteUser(userId);
 
@@ -257,14 +258,14 @@ export class UserController {
         res.clearCookie(cookieAttributeForJwtToken); // on deleting the user, the auth token must be deleted from cookie as well
         return sendResponse(res, STATUS_CODES.OK, `User with id ${userId} deleted successfully`);
       }
-      return sendResponse(res, STATUS_CODES.BAD_REQUEST, `User with id ${userId} could not be deleted`);
+      return next(new AppError(`User with id ${userId} could not be deleted`, STATUS_CODES.BAD_REQUEST));
     } catch (error) {
-      return sendResponse(
-        res,
-        error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
-        error.message || 'Internal Server Error',
-        [],
-        error.response || error
+      return next(
+        new AppError(
+          error.message || 'Internal Server Error',
+          error.status || STATUS_CODES.INTERNAL_SERVER_ERROR,
+          error.response || error
+        )
       );
     }
   }
