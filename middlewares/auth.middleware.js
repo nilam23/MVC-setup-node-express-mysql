@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { STATUS_CODES, cookieAttributeForJwtToken } from '../helpers/constants.js';
-import { sendResponse, verifyJwtToken } from '../helpers/utils.js';
+import { AppError } from '../helpers/error.js';
+import { verifyJwtToken } from '../helpers/utils.js';
 
 export const AuthMiddlewares = {};
 
@@ -25,7 +26,7 @@ AuthMiddlewares.checkAuth = async (req, res, next) => {
       };
       next();
     } catch (error) {
-      return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized', [], error);
+      return next(new AppError('You are not authorized', STATUS_CODES.UNAUTHORIZED));
     }
-  } else return sendResponse(res, STATUS_CODES.UNAUTHORIZED, 'You are not authorized');
+  } else return next(new AppError('You are not authorized', STATUS_CODES.UNAUTHORIZED));
 };

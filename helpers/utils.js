@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { jwtExpiry } from './constants.js';
