@@ -30,3 +30,17 @@ AuthMiddlewares.checkAuth = async (req, res, next) => {
     }
   } else return next(new AppError('You are not authorized', STATUS_CODES.UNAUTHORIZED));
 };
+
+/**
+ * @description
+ * the following middleware checks if a user is already logged in
+ * @param {object} req the request object
+ * @param {object} res the response object
+ * @param {object} next the next middleware function in the application’s request-response cycle
+ */
+AuthMiddlewares.isAuthenticated = async (req, res, next) => {
+  const token = req.cookies[`${cookieAttributeForJwtToken}`];
+
+  if (!token) return next();
+  return next(new AppError('You are already logged in', STATUS_CODES.BAD_REQUEST));
+};
