@@ -19,6 +19,7 @@ export class AuthController {
    * the controller method to sign up a new user
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the newly created user
    */
   static async signUpUser(req, res, next) {
@@ -54,6 +55,7 @@ export class AuthController {
    * the controller method to log in an existing user
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the information of the logged in user and the access token
    */
   static async logInUser(req, res, next) {
@@ -90,6 +92,7 @@ export class AuthController {
    * the controller method to log out a user
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    */
   static logOutUser(req, res, next) {
     if (req.cookies[`${cookieAttributeForJwtToken}`]) {

@@ -24,7 +24,7 @@ export const blogCreationRequiredFields = {
   DESCRIPTION: 'description'
 };
 
-// the possible fields to update a blog
+// blog fields that can be updated
 export const possibleBlogUpdateFields = {
   TITLE: 'title',
   DESCRIPTION: 'description'

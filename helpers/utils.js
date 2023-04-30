@@ -7,8 +7,8 @@ import { jwtExpiry } from './constants.js';
  * the following method is responsible for sending a response back to the client
  * @param {object} res the response object
  * @param {number} statusCode the http status code
- * @param {array} result the result object when the req is successful
  * @param {string} message the message to be sent to the client
+ * @param {array} result the result object when the req is successful
  * @param {object} error the error object to be sent to the client, when exists
  */
 export const sendResponse = (res, statusCode, message, result = [], error = {}) => {
@@ -61,7 +61,7 @@ export const isAvailable = (targetObj, requiredFieldsArr, checkForAll = true) =>
 /**
  * @description
  * the following method recieves the user's plaintext password and produces a hash of the same
- * @param {string} plainTextPassword the plaintext password of the user
+ * @param {string} password the plaintext password of the user
  * @returns the hash value of the password
  */
 export const getHashPassword = async (password) => {
@@ -105,8 +105,8 @@ export const getJwtToken = (jwtPayload) => jwt.sign(
  * @description
  * the following method creates a cookie and attaches it to the response object
  * @param {object} res the response to be sent back to the client
- * @param {*} key the key of the cookie to be created
- * @param {*} value the value of the cookie to be created
+ * @param {string} key the key of the cookie to be created
+ * @param {string} value the value of the cookie to be created
  */
 export const saveCookie = (res, key, value) => res.cookie(key, value, { httpOnly: true, maxAge: jwtExpiry * 1000 });
 
