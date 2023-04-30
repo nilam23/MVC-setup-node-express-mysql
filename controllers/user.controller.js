@@ -16,6 +16,7 @@ export class UserController {
    * the controller method to fetch all blogs for a particular user
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the array of blogs for the user
    */
   static async getAllBlogs(req, res, next) {
@@ -41,6 +42,7 @@ export class UserController {
    * the controller method to create a blog for a particular user
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the created blog for the user
    */
   static async createBlog(req, res, next) {
@@ -77,6 +79,7 @@ export class UserController {
    * the controller method to fetch the blog corresponding to a blog id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the blog fetched from the database
    */
   static async getBlogById(req, res, next) {
@@ -104,6 +107,7 @@ export class UserController {
    * the controller method to update some attributes of a blog corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    */
   static async updateBlog(req, res, next) {
     const { body: requestBody } = req;
@@ -141,6 +145,7 @@ export class UserController {
    * the controller method to delete a blog corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    */
   static async deleteBlog(req, res, next) {
     const blogId = req.params.id;
@@ -172,6 +177,7 @@ export class UserController {
    * the controller method to fetch a user corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    * @returns the user fetched from the database
    */
   static async getUserById(req, res, next) {
@@ -204,6 +210,7 @@ export class UserController {
    * the controller method to update some attributes of a user corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    */
   static async updateUser(req, res, next) {
     const { body: requestBody } = req;
@@ -241,6 +248,7 @@ export class UserController {
    * the controller method to delete a user corresponding to an id
    * @param {object} req the request object
    * @param {object} res the response object
+   * @param {object} next the next middleware function in the application’s request-response cycle
    */
   static async deleteUser(req, res, next) {
     const userId = req.params.id;
